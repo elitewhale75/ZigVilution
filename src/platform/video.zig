@@ -8,7 +8,7 @@ pub fn initVideo() !void {
     rl.setTargetFPS(35);
 }
 
-pub fn updateDisplay() !void {
+pub fn updateDisplay() void {
     rl.beginDrawing();
     defer rl.endDrawing();
 

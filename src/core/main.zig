@@ -3,7 +3,7 @@ const wad = @import("wad");
 
 fn doomLoop() !void {
     while (!video.windowShouldClose()) {
-        try video.updateDisplay();
+        video.updateDisplay();
     }
 }
 
@@ -12,7 +12,8 @@ pub fn main() !void {
     // Initialize subsystems
     try video.initVideo();
     defer video.closeWindow();
-    try wad.initWad();
+
+    try wad.initWad(); // Usually allow init multiple WADs
 
     // Main Loop
     try doomLoop();
