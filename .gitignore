@@ -24,3 +24,5 @@ zig-cache/
 .DS_Store
 
 .direnv
+
+assets/

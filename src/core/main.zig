@@ -1,10 +1,19 @@
-const std = @import("std");
+const video = @import("video");
+const wad = @import("wad");
+
+fn doomLoop() !void {
+    while (!video.windowShouldClose()) {
+        try video.updateDisplay();
+    }
+}
 
 pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
-    try stdout.print("Hello Doomguy.\n", .{});
 
-    // Initialize subsystems (video, audio, renderer, gameplay)
+    // Initialize subsystems
+    try video.initVideo();
+    defer video.closeWindow();
+    try wad.initWad();
 
-    // Game loop, never return
+    // Main Loop
+    try doomLoop();
 }
