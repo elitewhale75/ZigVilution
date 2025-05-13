@@ -22,21 +22,26 @@ const LumpInfo = extern struct {
 
 var lumpInfo: []LumpInfo = undefined;
 var numberOfLumps: u32 = 0;
-var lumpCache: []*void = undefined;
-var arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+var lumpCache: []*void = undefined; // Owner of raw lump data
+//TODO: Yeah this needs to be reworked altogether at some point (custom arena?)
+//TODO: Also you gotta free this dumbass
+pub var arena: std.heap.ArenaAllocator = undefined;
 
 pub fn initWad() !void {
+    arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     const allocator = arena.allocator();
-    try addFile("assets/DOOM.WAD", &allocator);
+    try addFile("assets/DOOM2.WAD", &allocator);
 }
 
+// Copy and add lump directory entry tables from WAD files to memory
+// TODO: Check if iWAD file exists first
+// TODO: Check if file is a valid WAD file
 pub fn addFile(file_path: []const u8, allocator: *const std.mem.Allocator) !void {
     const iwad = try std.fs.cwd().openFile(
         file_path,
         .{ .mode = .read_only },
     );
     defer iwad.close();
-
     const header = try iwad.reader().readStruct(WadInfo);
     std.debug.print(
         "WAD ID:            {s}\n" ++
@@ -54,8 +59,6 @@ pub fn addFile(file_path: []const u8, allocator: *const std.mem.Allocator) !void
         lumpInfo,
         alloc_size,
     );
-
-    // Read lump info table into lumpInfo and update the amount of lumps
     for (numberOfLumps..(numberOfLumps + header.numlumps)) |i| {
         const lump: FileLump = try iwad.reader().readStruct(FileLump);
         lumpInfo[i].name = lump.name;
@@ -63,7 +66,29 @@ pub fn addFile(file_path: []const u8, allocator: *const std.mem.Allocator) !void
         lumpInfo[i].position = lump.filepos;
         lumpInfo[i].size = lump.size;
     }
-
+    std.debug.print("Lump 612 Name: {s}\n", .{lumpInfo[612].name});
     numberOfLumps += header.numlumps;
-    std.debug.print("Lump 0 Name: {s}\n", .{lumpInfo[0].name});
+}
+
+// Dump contents of lumpCache
+fn dumpLumpCache() void {}
+
+// Used on cache misses to load lump data to memory
+fn cacheLumpData() void {
+
+}
+
+// Free lump data from memory forcibly
+fn purgeLumpCache() void {
+
+}
+
+// API for retrieving lumps from memory
+fn getLump(lumpName: []u8) !*void {
+    std.debug.print("Retrieving lump: {s}\n", .{lumpName});
+
+}
+
+fn findLumpFromName(lumpName: []u8) !*LumpInfo{
+    std.debug.print("Search LumpInfo for: {s}\n", .{lumpName});
 }
