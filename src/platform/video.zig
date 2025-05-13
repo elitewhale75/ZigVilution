@@ -1,5 +1,8 @@
 const rl = @import("raylib");
 
+const screenCount = 5;
+var screens: [screenCount][]u8 = undefined;
+
 pub fn initVideo() !void {
     const screenWidth = 800;
     const screenHeight = 450;

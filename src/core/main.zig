@@ -1,7 +1,7 @@
 const video = @import("video");
 const wad = @import("wad");
 
-fn doomLoop() !void {
+fn doomLoop() void {
     while (!video.windowShouldClose()) {
         video.updateDisplay();
     }
@@ -16,5 +16,5 @@ pub fn main() !void {
     try wad.initWad(); // Usually allow init multiple WADs
 
     // Main Loop
-    try doomLoop();
+    doomLoop();
 }
