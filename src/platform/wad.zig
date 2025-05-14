@@ -20,6 +20,10 @@ const LumpInfo = extern struct {
     size: u32,
     handle: i32,
 };
+const ComparisonUnion = extern union {
+    name: [8]u8,
+    long: u64,
+};
 
 var lumpInfo: []LumpInfo = undefined;
 var numberOfLumps: u32 = 0;
@@ -32,6 +36,7 @@ pub fn initWad() !void {
     heapAllocator = std.heap.page_allocator;
     try addFile("assets/DOOM2.WAD", &heapAllocator);
     lumpCache = try heapAllocator.alloc(*void, numberOfLumps);
+    _ = try findLumpFromName("DSVILSIT");
 }
 
 // Copy and add lump directory entry tables from WAD files to memory
@@ -85,6 +90,22 @@ pub fn getLump(lumpName: []u8) !*void {
     std.debug.print("Retrieving lump: {s}\n", .{lumpName});
 }
 
-fn findLumpFromName(lumpName: []u8) !*LumpInfo {
-    std.debug.print("Search LumpInfo for: {s}\n", .{lumpName});
+//TODO: Check length of lumpName
+fn findLumpFromName(lumpName: []const u8) !*LumpInfo {
+    var i: u32 = numberOfLumps - 1;
+    var paddedLumpName: [8]u8 = [_]u8{0} ** 8;
+    @memcpy(paddedLumpName[0..lumpName.len], lumpName[0..lumpName.len]);
+
+    const LumpNameComparison: ComparisonUnion = ComparisonUnion{
+        .name = paddedLumpName,
+    };
+
+    while (i > 0) {
+        const lumpInfoLong: u64 = @bitCast(lumpInfo[i].name);
+        if (lumpInfoLong == LumpNameComparison.long) {
+            return &lumpInfo[i];
+        }
+        i -= 1;
+    }
+    return error.LumpNotFound;
 }
